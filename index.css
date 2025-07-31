@@ -71,6 +71,37 @@ button{
     font-weight: 600;
 }
 
+.view-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.view-btn {
+    background-color: #e1e8ed;
+    color: #657786;
+    border: 1px solid #e1e8ed;
+    padding: 8px 16px;
+    border-radius: 20px;
+    width: auto;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn.active {
+    background-color: #1DA1F2;
+    color: white;
+    border-color: #1DA1F2;
+}
+
+.view-btn:hover {
+    background-color: #1a8cd8;
+    color: white;
+    border-color: #1a8cd8;
+}
+
 /* tweet */
 
 .tweet{

@@ -1,19 +1,33 @@
-# Getting Started
-Install the dependencies and run the project
-```
+# Twimba - Twitter Clone
+
+A simple Twitter clone built with vanilla JavaScript, HTML, and CSS.
+
+## Features
+
+- **Tweet Creation**: Users can create new tweets
+- **Like & Retweet**: Interactive like and retweet functionality
+- **Reply System**: View replies to tweets
+- **My Tweets View**: View only your own tweets (stored in local storage)
+- **All Tweets View**: View all tweets including your own
+
+## How to Use
+
+1. **Creating Tweets**: Type your tweet in the text area and click "Tweet"
+2. **Viewing Tweets**: 
+   - Click "All Tweets" to see all tweets (including your own)
+   - Click "My Tweets" to see only the tweets you've created
+3. **Interacting**: Click the heart to like or the retweet icon to retweet
+4. **Replies**: Click the comment icon to view replies
+
+## Local Storage Feature
+
+Your tweets are automatically saved to your browser's local storage, so they persist between sessions. You can view only your tweets by clicking the "My Tweets" button.
+
+## Running the App
+
+```bash
 npm install
-npm start
+npm run dev
 ```
 
-Head over to https://vitejs.dev/ to learn more about configuring vite
-## About Scrimba
-
-At Scrimba our goal is to create the best possible coding school at the cost of a gym membership! 💜
-If we succeed with this, it will give anyone who wants to become a software developer a realistic shot at succeeding, regardless of where they live and the size of their wallets 🎉
-The Fullstack Developer Path aims to teach you everything you need to become a Junior Developer, or you could take a deep-dive with one of our advanced courses 🚀
-
-- [Our courses](https://scrimba.com/courses)
-- [The Frontend Career Path](https://scrimba.com/fullstack-path-c0fullstack)
-- [Become a Scrimba Pro member](https://scrimba.com/pricing)
-
-Happy Coding!
+Then open your browser to the local development server URL.

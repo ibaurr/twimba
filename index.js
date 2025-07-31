@@ -1,6 +1,8 @@
 import { tweetsData } from './data.js'
 import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
+let currentView = 'all'; // 'all' or 'my-tweets'
+
 document.addEventListener('click', function(e){
     if(e.target.dataset.like){
        handleLikeClick(e.target.dataset.like) 
@@ -14,35 +16,93 @@ document.addEventListener('click', function(e){
     else if(e.target.id === 'tweet-btn'){
         handleTweetBtnClick()
     }
+    else if(e.target.id === 'view-all-btn'){
+        handleViewAllClick()
+    }
+    else if(e.target.id === 'view-my-tweets-btn'){
+        handleViewMyTweetsClick()
+    }
 })
  
 function handleLikeClick(tweetId){ 
-    const targetTweetObj = tweetsData.filter(function(tweet){
+    // Check in main tweets data
+    let targetTweetObj = tweetsData.filter(function(tweet){
         return tweet.uuid === tweetId
     })[0]
-
-    if (targetTweetObj.isLiked){
-        targetTweetObj.likes--
+    
+    // If not found in main data, check user tweets
+    if (!targetTweetObj) {
+        const userTweets = getUserTweets();
+        targetTweetObj = userTweets.filter(function(tweet){
+            return tweet.uuid === tweetId
+        })[0]
+        
+        if (targetTweetObj) {
+            // Update the user tweet in local storage
+            if (targetTweetObj.isLiked){
+                targetTweetObj.likes--
+            } else {
+                targetTweetObj.likes++ 
+            }
+            targetTweetObj.isLiked = !targetTweetObj.isLiked
+            
+            // Save updated user tweets back to local storage
+            const updatedUserTweets = userTweets.map(tweet => 
+                tweet.uuid === tweetId ? targetTweetObj : tweet
+            );
+            localStorage.setItem('userTweets', JSON.stringify(updatedUserTweets));
+        }
+    } else {
+        // Update main feed tweet
+        if (targetTweetObj.isLiked){
+            targetTweetObj.likes--
+        } else {
+            targetTweetObj.likes++ 
+        }
+        targetTweetObj.isLiked = !targetTweetObj.isLiked
     }
-    else{
-        targetTweetObj.likes++ 
-    }
-    targetTweetObj.isLiked = !targetTweetObj.isLiked
+    
     render()
 }
 
 function handleRetweetClick(tweetId){
-    const targetTweetObj = tweetsData.filter(function(tweet){
+    // Check in main tweets data
+    let targetTweetObj = tweetsData.filter(function(tweet){
         return tweet.uuid === tweetId
     })[0]
     
-    if(targetTweetObj.isRetweeted){
-        targetTweetObj.retweets--
+    // If not found in main data, check user tweets
+    if (!targetTweetObj) {
+        const userTweets = getUserTweets();
+        targetTweetObj = userTweets.filter(function(tweet){
+            return tweet.uuid === tweetId
+        })[0]
+        
+        if (targetTweetObj) {
+            // Update the user tweet in local storage
+            if(targetTweetObj.isRetweeted){
+                targetTweetObj.retweets--
+            } else {
+                targetTweetObj.retweets++
+            }
+            targetTweetObj.isRetweeted = !targetTweetObj.isRetweeted
+            
+            // Save updated user tweets back to local storage
+            const updatedUserTweets = userTweets.map(tweet => 
+                tweet.uuid === tweetId ? targetTweetObj : tweet
+            );
+            localStorage.setItem('userTweets', JSON.stringify(updatedUserTweets));
+        }
+    } else {
+        // Update main feed tweet
+        if(targetTweetObj.isRetweeted){
+            targetTweetObj.retweets--
+        } else {
+            targetTweetObj.retweets++
+        }
+        targetTweetObj.isRetweeted = !targetTweetObj.isRetweeted
     }
-    else{
-        targetTweetObj.retweets++
-    }
-    targetTweetObj.isRetweeted = !targetTweetObj.isRetweeted
+    
     render() 
 }
 
@@ -54,7 +114,7 @@ function handleTweetBtnClick(){
     const tweetInput = document.getElementById('tweet-input')
 
     if(tweetInput.value){
-        tweetsData.unshift({
+        const newTweet = {
             handle: `@Scrimba`,
             profilePic: `images/scrimbalogo.png`,
             likes: 0,
@@ -63,18 +123,71 @@ function handleTweetBtnClick(){
             replies: [],
             isLiked: false,
             isRetweeted: false,
-            uuid: uuidv4()
-        })
-    render()
-    tweetInput.value = ''
+            uuid: uuidv4(),
+            isUserTweet: true // Flag to identify user's own tweets
+        }
+        
+        tweetsData.unshift(newTweet)
+        
+        // Save to local storage
+        saveUserTweet(newTweet)
+        
+        render()
+        tweetInput.value = ''
     }
+}
 
+function handleViewAllClick(){
+    currentView = 'all';
+    updateViewButtons();
+    render();
+}
+
+function handleViewMyTweetsClick(){
+    currentView = 'my-tweets';
+    updateViewButtons();
+    render();
+}
+
+function updateViewButtons(){
+    const allBtn = document.getElementById('view-all-btn');
+    const myTweetsBtn = document.getElementById('view-my-tweets-btn');
+    
+    if(currentView === 'all'){
+        allBtn.classList.add('active');
+        myTweetsBtn.classList.remove('active');
+    } else {
+        allBtn.classList.remove('active');
+        myTweetsBtn.classList.add('active');
+    }
+}
+
+function saveUserTweet(tweet){
+    const userTweets = getUserTweets();
+    userTweets.unshift(tweet);
+    localStorage.setItem('userTweets', JSON.stringify(userTweets));
+}
+
+function getUserTweets(){
+    const stored = localStorage.getItem('userTweets');
+    return stored ? JSON.parse(stored) : [];
 }
 
 function getFeedHtml(){
     let feedHtml = ``
     
-    tweetsData.forEach(function(tweet){
+    let tweetsToShow = [];
+    
+    if(currentView === 'all'){
+        // Combine user tweets with main feed tweets
+        const userTweets = getUserTweets();
+        tweetsToShow = [...userTweets, ...tweetsData];
+    } else {
+        // Show only user tweets
+        tweetsToShow = getUserTweets();
+    }
+    
+    tweetsToShow.forEach(function(tweet){
         
         let likeIconClass = ''
         
@@ -147,6 +260,7 @@ function getFeedHtml(){
 
 function render(){
     document.getElementById('feed').innerHTML = getFeedHtml()
+    updateViewButtons()
 }
 
 render()
